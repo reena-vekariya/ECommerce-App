@@ -22,6 +22,16 @@ export class UsersController {
     return this.usersService.addAddress(req.user.userId, address);
   }
 
+  @Delete('me/addresses/:addressId')
+  removeAddress(@Request() req: any, @Param('addressId') addressId: string) {
+    return this.usersService.removeAddress(req.user.userId, addressId);
+  }
+
+  @Patch('me/addresses/:addressId/default')
+  setDefaultAddress(@Request() req: any, @Param('addressId') addressId: string) {
+    return this.usersService.setDefaultAddress(req.user.userId, addressId);
+  }
+
   @Get()
   @Roles('admin')
   @UseGuards(RolesGuard)

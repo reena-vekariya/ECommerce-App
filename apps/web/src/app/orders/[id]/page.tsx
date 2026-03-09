@@ -1,14 +1,16 @@
 'use client';
 
-import { Container, Typography, Paper, Box, Chip, Grid, Divider, Alert } from '@mui/material';
+import {
+  Container, Typography, Paper, Box, Chip, Grid, Divider, Alert,
+  Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import { orderService } from '@/services/order.service';
 import { IOrder } from '@/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { useAuthStore } from '@/store/auth.store';
 import { useRouter } from 'next/navigation';
-import { ArrowBack } from '@mui/icons-material';
-import { Button } from '@mui/material';
+import { ArrowBack, Cancel } from '@mui/icons-material';
 
 const STATUS_STEPS = ['pending', 'processing', 'shipped', 'delivered'];
 const STATUS_COLORS: Record<string, 'default' | 'warning' | 'info' | 'success' | 'error'> = {
@@ -17,9 +19,13 @@ const STATUS_COLORS: Record<string, 'default' | 'warning' | 'info' | 'success' |
 
 interface Props { params: { id: string } }
 
+const CANCELLABLE = ['pending', 'processing'];
+
 export default function OrderDetailPage({ params }: Props) {
   const [order, setOrder] = useState<IOrder | null>(null);
   const [loading, setLoading] = useState(true);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const { token } = useAuthStore();
   const router = useRouter();
 
@@ -28,18 +34,43 @@ export default function OrderDetailPage({ params }: Props) {
     orderService.getOrder(params.id).then(setOrder).finally(() => setLoading(false));
   }, [params.id, token]);
 
+  const handleCancel = async () => {
+    if (!order) return;
+    setCancelling(true);
+    try {
+      const updated = await orderService.cancelOrder(order._id);
+      setOrder(updated);
+    } finally {
+      setCancelling(false);
+      setCancelOpen(false);
+    }
+  };
+
   if (!token) return null;
   if (loading) return <LoadingSpinner />;
   if (!order) return <Alert severity="error">Order not found</Alert>;
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Button startIcon={<ArrowBack />} onClick={() => router.back()} sx={{ mb: 2 }}>Back</Button>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Button startIcon={<ArrowBack />} onClick={() => router.back()}>Back</Button>
+        {CANCELLABLE.includes(order.status) && (
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<Cancel />}
+            onClick={() => setCancelOpen(true)}
+          >
+            Cancel Order
+          </Button>
+        )}
+      </Box>
+
       <Typography variant="h5" fontWeight="bold" gutterBottom>
         Order #{order._id.slice(-8).toUpperCase()}
       </Typography>
 
-      <Box className="flex items-center gap-2 mb-4">
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
         <Chip
           label={order.status.charAt(0).toUpperCase() + order.status.slice(1)}
           color={STATUS_COLORS[order.status] ?? 'default'}
@@ -129,6 +160,29 @@ export default function OrderDetailPage({ params }: Props) {
           </Paper>
         </Grid>
       </Grid>
+
+      {/* Cancel confirmation dialog */}
+      <Dialog open={cancelOpen} onClose={() => setCancelOpen(false)}>
+        <DialogTitle>Cancel Order?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to cancel order{' '}
+            <strong>#{order._id.slice(-8).toUpperCase()}</strong>?
+            This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setCancelOpen(false)}>Keep Order</Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleCancel}
+            disabled={cancelling}
+          >
+            {cancelling ? 'Cancelling…' : 'Yes, Cancel'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

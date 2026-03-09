@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import {
   ShoppingCart, Search, Favorite, Dashboard,
-  ShoppingBag, Logout, AccountCircle,
+  ShoppingBag, Logout, Home,
 } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -122,6 +122,11 @@ export default function Navbar() {
                   <MenuItem onClick={() => handleNav('/wishlist')}>
                     <ListItemIcon><Favorite fontSize="small" /></ListItemIcon>
                     My Wishlist
+                  </MenuItem>
+
+                  <MenuItem onClick={() => handleNav('/profile/addresses')}>
+                    <ListItemIcon><Home fontSize="small" /></ListItemIcon>
+                    My Addresses
                   </MenuItem>
 
                   {user.role === 'admin' && (

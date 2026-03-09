@@ -48,4 +48,23 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
+
+  async removeAddress(userId: string, addressId: string): Promise<UserDocument> {
+    const user = await this.userModel.findByIdAndUpdate(
+      userId,
+      { $pull: { addresses: { _id: addressId } } },
+      { new: true }
+    ).select('-passwordHash').exec();
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  async setDefaultAddress(userId: string, addressId: string): Promise<UserDocument> {
+    const user = await this.userModel.findById(userId).select('-passwordHash').exec();
+    if (!user) throw new NotFoundException('User not found');
+    (user.addresses as any[]).forEach((addr: any) => {
+      addr.isDefault = addr._id.toString() === addressId;
+    });
+    return user.save();
+  }
 }
