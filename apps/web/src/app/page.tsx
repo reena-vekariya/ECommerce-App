@@ -28,29 +28,62 @@ export default function HomePage() {
   return (
     <SnackbarProvider>
       {/* Hero */}
-      <Box
-        sx={{
-          background: 'linear-gradient(135deg, #232F3E 0%, #37475A 100%)',
-          color: 'white',
-          py: { xs: 6, md: 12 },
-          textAlign: 'center',
-        }}
-      >
-        <Container maxWidth="md">
-          <Typography variant="h3" fontWeight="bold" gutterBottom>
-            Welcome to <span style={{ color: '#FF9900' }}>ShopHub</span>
+      <Box sx={{ position: 'relative', overflow: 'hidden', minHeight: { xs: 320, md: 480 }, display: 'flex', alignItems: 'center' }}>
+        {/* Background image */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: 'url(https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1920&h=900&fit=crop&auto=format)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            transform: 'scale(1.03)',
+            transition: 'transform 8s ease-out',
+          }}
+        />
+        {/* Gradient overlay for readability */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(135deg, rgba(15,17,17,0.78) 0%, rgba(35,47,62,0.68) 60%, rgba(35,47,62,0.45) 100%)',
+          }}
+        />
+        {/* Content */}
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1, py: { xs: 8, md: 14 }, textAlign: 'center' }}>
+          <Typography
+            variant="h2"
+            fontWeight="bold"
+            gutterBottom
+            sx={{ color: 'white', fontSize: { xs: '2rem', md: '3rem' }, textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}
+          >
+            Welcome to{' '}
+            <Box component="span" sx={{ color: '#FF9900' }}>ShopHub</Box>
           </Typography>
-          <Typography variant="h6" sx={{ color: 'grey.300', mb: 4 }}>
+          <Typography
+            variant="h6"
+            sx={{ color: 'grey.300', mb: 4, textShadow: '0 1px 6px rgba(0,0,0,0.6)', fontWeight: 400 }}
+          >
             Millions of products. Fast delivery. Cash on delivery.
           </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={() => router.push('/products')}
-            sx={{ bgcolor: '#FF9900', color: '#000', px: 4, py: 1.5, fontSize: 18, fontWeight: 'bold' }}
-          >
-            Shop Now
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => router.push('/products')}
+              sx={{ bgcolor: '#FF9900', color: '#000', px: 4, py: 1.5, fontSize: 17, fontWeight: 'bold', '&:hover': { bgcolor: '#FEBD69' } }}
+            >
+              Shop Now
+            </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={() => router.push('/search?q=')}
+              sx={{ borderColor: 'white', color: 'white', px: 4, py: 1.5, fontSize: 17, '&:hover': { borderColor: '#FF9900', color: '#FF9900' } }}
+            >
+              Browse Deals
+            </Button>
+          </Box>
         </Container>
       </Box>
 
