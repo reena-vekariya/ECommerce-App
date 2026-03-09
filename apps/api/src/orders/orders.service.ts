@@ -96,6 +96,16 @@ export class OrdersService {
     return order;
   }
 
+  async cancelOrder(id: string, userId: string) {
+    const order = await this.orderModel.findOne({ _id: id, userId }).exec();
+    if (!order) throw new NotFoundException('Order not found');
+    if (!['pending', 'processing'].includes(order.status)) {
+      throw new BadRequestException(`Cannot cancel an order with status "${order.status}"`);
+    }
+    order.status = 'cancelled';
+    return order.save();
+  }
+
   async getAllOrders(page = 1, limit = 20, status?: string) {
     const skip = (page - 1) * limit;
     const query: any = {};

@@ -10,6 +10,9 @@ export const orderService = {
   getOrder: (id: string) =>
     api.get(`/orders/${id}`).then((r) => r.data),
 
+  cancelOrder: (id: string) =>
+    api.patch(`/orders/${id}/cancel`).then((r) => r.data),
+
   updateStatus: (id: string, status: string) =>
     api.patch(`/orders/${id}/status`, { status }).then((r) => r.data),
 };

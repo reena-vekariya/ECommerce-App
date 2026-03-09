@@ -37,6 +37,11 @@ export class OrdersController {
     return this.ordersService.getOrderById(id, userId);
   }
 
+  @Patch(':id/cancel')
+  cancelOrder(@Request() req: any, @Param('id') id: string) {
+    return this.ordersService.cancelOrder(id, req.user.userId);
+  }
+
   @Patch(':id/status')
   @Roles('admin')
   @UseGuards(RolesGuard)
