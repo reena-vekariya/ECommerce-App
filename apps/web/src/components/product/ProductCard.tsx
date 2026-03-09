@@ -2,29 +2,41 @@
 import {
   Card, CardContent, CardActions, Typography, IconButton, Button, Box, Chip,
 } from '@mui/material';
-import { Favorite, FavoriteBorder, ShoppingCart } from '@mui/icons-material';
+import { Favorite, FavoriteBorder, ShoppingCart, Add, Remove } from '@mui/icons-material';
 import { IProduct } from '@/types';
 import StarRating from '@/components/ui/StarRating';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 
 interface Props {
   product: IProduct;
   onAddToCart?: (productId: string) => void;
   onToggleWishlist?: (productId: string) => void;
   isWishlisted?: boolean;
+  cartQty?: number;
+  onUpdateQty?: (qty: number) => void;
+  onRemoveFromCart?: () => void;
 }
 
-export default function ProductCard({ product, onAddToCart, onToggleWishlist, isWishlisted }: Props) {
+export default function ProductCard({
+  product,
+  onAddToCart,
+  onToggleWishlist,
+  isWishlisted,
+  cartQty = 0,
+  onUpdateQty,
+  onRemoveFromCart,
+}: Props) {
   const router = useRouter();
-  const effectivePrice = product.discountPrice ?? product.price;
-  const hasDiscount = product.discountPrice && product.discountPrice < product.price;
+  const effectivePrice = product.discountPrice ?? product.price ?? 0;
+  const hasDiscount = product.discountPrice && product.price && product.discountPrice < product.price;
   const imgSrc = product.images?.[0]
-    ? product.images[0].startsWith('http') ? product.images[0] : `http://localhost:4000${product.images[0]}`
+    ? product.images[0].startsWith('http')
+      ? product.images[0]
+      : `http://localhost:4000${product.images[0]}`
     : '/placeholder.png';
 
   return (
-    <Card className="h-full flex flex-col hover:shadow-lg transition-shadow" sx={{ position: 'relative' }}>
+    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative', '&:hover': { boxShadow: 6 }, transition: 'box-shadow 0.2s' }}>
       <Box
         sx={{ position: 'relative', cursor: 'pointer', bgcolor: 'grey.100', height: 200 }}
         onClick={() => router.push(`/products/${product._id}`)}
@@ -55,23 +67,29 @@ export default function ProductCard({ product, onAddToCart, onToggleWishlist, is
         )}
       </Box>
 
-      <CardContent className="flex-1 p-3">
+      <CardContent sx={{ flex: 1, p: 1.5 }}>
         <Typography
           variant="body2"
-          className="line-clamp-2 cursor-pointer"
           fontWeight={500}
           onClick={() => router.push(`/products/${product._id}`)}
+          sx={{
+            cursor: 'pointer',
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+          }}
         >
           {product.name}
         </Typography>
-        <StarRating value={product.ratings.avg} count={product.ratings.count} />
-        <Box className="flex items-center gap-2 mt-1">
+        <StarRating value={product.ratings?.avg ?? 0} count={product.ratings?.count ?? 0} />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
           <Typography variant="h6" fontWeight="bold" color="text.primary">
             ${effectivePrice.toFixed(2)}
           </Typography>
           {hasDiscount && (
             <Typography variant="body2" color="text.secondary" sx={{ textDecoration: 'line-through' }}>
-              ${product.price.toFixed(2)}
+              ${(product.price ?? 0).toFixed(2)}
             </Typography>
           )}
         </Box>
@@ -80,17 +98,54 @@ export default function ProductCard({ product, onAddToCart, onToggleWishlist, is
         )}
       </CardContent>
 
-      <CardActions className="p-3 pt-0 flex justify-between">
-        <Button
-          size="small"
-          variant="contained"
-          startIcon={<ShoppingCart />}
-          disabled={product.stock === 0}
-          onClick={() => onAddToCart?.(product._id)}
-          sx={{ bgcolor: '#FF9900', color: '#000', '&:hover': { bgcolor: '#FEBD69' } }}
-        >
-          Add to Cart
-        </Button>
+      <CardActions sx={{ p: 1.5, pt: 0, justifyContent: 'space-between', alignItems: 'center' }}>
+        {cartQty > 0 ? (
+          /* Quantity controls — shown when product is already in cart */
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <IconButton
+              size="small"
+              onClick={() => cartQty > 1 ? onUpdateQty?.(cartQty - 1) : onRemoveFromCart?.()}
+              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 0.5 }}
+            >
+              <Remove sx={{ fontSize: 16 }} />
+            </IconButton>
+            <Box
+              sx={{
+                minWidth: 34,
+                textAlign: 'center',
+                border: '1px solid',
+                borderColor: 'primary.main',
+                borderRadius: 1,
+                py: 0.25,
+                px: 0.75,
+              }}
+            >
+              <Typography variant="body2" fontWeight={700} color="primary">
+                {cartQty}
+              </Typography>
+            </Box>
+            <IconButton
+              size="small"
+              onClick={() => onUpdateQty?.(cartQty + 1)}
+              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 0.5 }}
+            >
+              <Add sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Box>
+        ) : (
+          /* Add to Cart button — shown when product is NOT in cart */
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<ShoppingCart />}
+            disabled={product.stock === 0}
+            onClick={() => onAddToCart?.(product._id)}
+            sx={{ bgcolor: '#FF9900', color: '#000', '&:hover': { bgcolor: '#FEBD69' } }}
+          >
+            Add to Cart
+          </Button>
+        )}
+
         <IconButton size="small" onClick={() => onToggleWishlist?.(product._id)}>
           {isWishlisted ? <Favorite color="error" /> : <FavoriteBorder />}
         </IconButton>

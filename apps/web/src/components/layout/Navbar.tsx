@@ -2,11 +2,11 @@
 
 import {
   AppBar, Toolbar, Typography, IconButton, Badge, Box,
-  InputBase, Button, Avatar, Menu, MenuItem, Drawer,
+  InputBase, Button, Avatar, Menu, MenuItem, Divider, ListItemIcon,
 } from '@mui/material';
 import {
-  ShoppingCart, Search, Favorite, AccountCircle,
-  Dashboard, Menu as MenuIcon,
+  ShoppingCart, Search, Favorite, Dashboard,
+  ShoppingBag, Logout, AccountCircle,
 } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -42,9 +42,14 @@ export default function Navbar() {
     router.push('/');
   };
 
+  const handleNav = (path: string) => {
+    router.push(path);
+    setAnchorEl(null);
+  };
+
   return (
     <>
-      <AppBar position="sticky" sx={{ bgcolor: '#232F3E', zIndex: 1200 }}>
+      <AppBar position="sticky" sx={{ bgcolor: '#232F3E', color: '#fff', zIndex: 1200 }}>
         <Toolbar className="gap-3">
           <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
             <Typography variant="h6" fontWeight="bold" sx={{ color: '#FF9900', whiteSpace: 'nowrap' }}>
@@ -85,20 +90,55 @@ export default function Navbar() {
 
             {user ? (
               <>
-                {user.role === 'admin' && (
-                  <Link href="/admin" style={{ color: 'inherit' }}>
-                    <IconButton color="inherit"><Dashboard /></IconButton>
-                  </Link>
-                )}
                 <IconButton color="inherit" onClick={(e) => setAnchorEl(e.currentTarget)}>
                   <Avatar sx={{ width: 32, height: 32, bgcolor: '#FF9900', color: '#000', fontSize: 14 }}>
                     {user.fullName[0].toUpperCase()}
                   </Avatar>
                 </IconButton>
-                <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
-                  <MenuItem onClick={() => { router.push('/profile'); setAnchorEl(null); }}>Profile</MenuItem>
-                  <MenuItem onClick={() => { router.push('/orders'); setAnchorEl(null); }}>My Orders</MenuItem>
-                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
+
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={() => setAnchorEl(null)}
+                  PaperProps={{ sx: { minWidth: 220, mt: 1 } }}
+                  transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                  anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                >
+                  {/* User info header */}
+                  <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+                    <Typography variant="subtitle2" fontWeight="bold" noWrap>
+                      {user.fullName}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" noWrap>
+                      {user.email}
+                    </Typography>
+                  </Box>
+
+                  <MenuItem onClick={() => handleNav('/orders')}>
+                    <ListItemIcon><ShoppingBag fontSize="small" /></ListItemIcon>
+                    My Orders
+                  </MenuItem>
+
+                  <MenuItem onClick={() => handleNav('/wishlist')}>
+                    <ListItemIcon><Favorite fontSize="small" /></ListItemIcon>
+                    My Wishlist
+                  </MenuItem>
+
+                  {user.role === 'admin' && (
+                    <MenuItem onClick={() => handleNav('/admin')}>
+                      <ListItemIcon><Dashboard fontSize="small" /></ListItemIcon>
+                      Admin Dashboard
+                    </MenuItem>
+                  )}
+
+                  <Divider />
+
+                  <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+                    <ListItemIcon>
+                      <Logout fontSize="small" sx={{ color: 'error.main' }} />
+                    </ListItemIcon>
+                    Sign Out
+                  </MenuItem>
                 </Menu>
               </>
             ) : (

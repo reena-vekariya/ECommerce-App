@@ -54,21 +54,36 @@ export default function OrderDetailPage({ params }: Props) {
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" fontWeight="bold" gutterBottom>Items</Typography>
             {order.items.map((item, i) => (
-              <Box key={i} className="flex gap-3 py-2">
-                {item.image && (
-                  <img
-                    src={item.image.startsWith('http') ? item.image : `http://localhost:4000${item.image}`}
-                    alt={item.name}
-                    style={{ width: 64, height: 64, objectFit: 'contain', borderRadius: 4 }}
-                  />
-                )}
-                <Box className="flex-1">
+              <Box key={i} sx={{ display: 'flex', gap: 2, alignItems: 'center', py: 1.5 }}>
+                <img
+                  src={
+                    item.image
+                      ? item.image.startsWith('http')
+                        ? item.image
+                        : `http://localhost:4000${item.image}`
+                      : '/placeholder.png'
+                  }
+                  alt={item.name}
+                  onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
+                  style={{
+                    width: 72,
+                    height: 72,
+                    objectFit: 'contain',
+                    borderRadius: 4,
+                    backgroundColor: '#f5f5f5',
+                    flexShrink: 0,
+                    padding: 4,
+                  }}
+                />
+                <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body2" fontWeight="bold">{item.name}</Typography>
                   <Typography variant="body2" color="text.secondary">
-                    ${item.price.toFixed(2)} × {item.qty}
+                    ${(item.price ?? 0).toFixed(2)} × {item.qty}
                   </Typography>
                 </Box>
-                <Typography fontWeight="bold">${(item.price * item.qty).toFixed(2)}</Typography>
+                <Typography fontWeight="bold">
+                  ${((item.price ?? 0) * item.qty).toFixed(2)}
+                </Typography>
               </Box>
             ))}
           </Paper>
