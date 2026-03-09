@@ -70,7 +70,28 @@ export default function OrdersPage() {
                     </Typography>
                   </TableCell>
                   <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
-                  <TableCell>{order.items.length} item(s)</TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      {order.items.slice(0, 3).map((item, i) => (
+                        <img
+                          key={i}
+                          src={
+                            item.image
+                              ? item.image.startsWith('http')
+                                ? item.image
+                                : `http://localhost:4000${item.image}`
+                              : '/placeholder.png'
+                          }
+                          alt={item.name}
+                          onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
+                          style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 4, backgroundColor: '#f5f5f5' }}
+                        />
+                      ))}
+                      <Typography variant="caption" color="text.secondary">
+                        {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                      </Typography>
+                    </Box>
+                  </TableCell>
                   <TableCell><strong>${order.totalAmount.toFixed(2)}</strong></TableCell>
                   <TableCell>
                     <Chip
